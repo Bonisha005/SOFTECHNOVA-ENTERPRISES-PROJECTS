@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Online Examination Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap');
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    margin: 0; padding: 0;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  #app {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    width: 95%;
+    max-width: 600px;
+    padding: 2rem 3rem 3rem 3rem;
+  }
+  h1, h2 {
+    color: #4b3f72;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  button {
+    cursor: pointer;
+    background: #764ba2;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: background 0.3s ease;
+    box-shadow: 0 8px 15px rgba(118,75,162,0.3);
+  }
+  button:hover:not(:disabled) {
+    background: #8e63c7;
+  }
+  button:disabled {
+    background: #b7a6d9;
+    cursor: not-allowed;
+  }
+  .question-container {
+    margin-top: 1.5rem;
+  }
+  .question-text {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #5a4d7a;
+  }
+  .answers {
+    list-style: none;
+    padding-left: 0;
+  }
+  .answers li {
+    margin-bottom: 12px;
+  }
+  .answers li label {
+    cursor: pointer;
+    user-select: none;
+    font-weight: 500;
+    font-size: 1rem;
+  }
+  .score-container {
+    text-align: center;
+  }
+  .score-container h2 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    color: #403864;
+  }
+  .score-container p {
+    font-size: 1.2rem;
+    color: #6a5f8b;
+  }
+  .footer {
+    margin-top: 3rem;
+    font-size: 0.82rem;
+    text-align: center;
+    color: #999;
+  }
+</style>
+</head>
+<body>
+  <div id="app">
+    <div id="welcome-screen">
+      <h1>Online Examination Platform</h1>
+      <p>Test your knowledge with our randomized question exam.</p>
+      <button id="start-btn">Start Exam</button>
+    </div>
+
+    <div id="exam-screen" style="display:none;">
+      <h2>Question <span id="question-number"></span> / <span id="total-questions"></span></h2>
+      <div class="question-container">
+        <p class="question-text" id="question-text"></p>
+        <ul class="answers" id="answers-list"></ul>
+      </div>
+      <div style="margin-top:1.5rem; display:flex; justify-content:space-between;">
+        <button id="prev-btn" disabled>Previous</button>
+        <button id="next-btn">Next</button>
+      </div>
+      <div style="text-align:center; margin-top: 1.5rem;">
+        <button id="submit-btn" disabled>Submit Exam</button>
+      </div>
+    </div>
+
+    <div id="result-screen" style="display:none;">
+      <div class="score-container">
+        <h2>Your Score</h2>
+        <p id="score-text"></p>
+        <button id="retry-btn" style="margin-top: 2rem;">Retake Exam</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; 2025 Online Examination Platform
+    </div>
+  </div>
+
+<script>
+  const questionBank = [
+    {
+      question: "Which language runs in a web browser?",
+      answers: [
+        { text: "Java", isCorrect: false },
+        { text: "C", isCorrect: false },
+        { text: "Python", isCorrect: false },
+        { text: "JavaScript", isCorrect: true }
+      ]
+    },
+    {
+      question: "What does CSS stand for?",
+      answers: [
+        { text: "Central Style Sheets", isCorrect: false },
+        { text: "Cascading Style Sheets", isCorrect: true },
+        { text: "Cascading Simple Sheets", isCorrect: false },
+        { text: "Cars SUVs Sailboats", isCorrect: false }
+      ]
+    },
+    {
+      question: "What does HTML stand for?",
+      answers: [
+        { text: "Hypertext Markup Language", isCorrect: true },
+        { text: "Hypertext Markdown Language", isCorrect: false },
+        { text: "Hyperloop Machine Language", isCorrect: false },
+        { text: "Helicopters Terminals Motorboats Lamborginis", isCorrect: false }
+      ]
+    },
+    {
+      question: "What year was JavaScript launched?",
+      answers: [
+        { text: "1996", isCorrect: false },
+        { text: "1995", isCorrect: true },
+        { text: "1994", isCorrect: false },
+        { text: "None of the above", isCorrect: false }
+      ]
+    },
+    {
+      question: "Which one is a JavaScript framework?",
+      answers: [
+        { text: "React", isCorrect: true },
+        { text: "Laravel", isCorrect: false },
+        { text: "Django", isCorrect: false },
+        { text: "Flask", isCorrect: false }
+      ]
+    },
+    {
+      question: "Which symbol is used for comments in JavaScript?",
+      answers: [
+        { text: "#", isCorrect: false },
+        { text: "//", isCorrect: true },
+        { text: "<!-- -->", isCorrect: false },
+        { text: "/* */", isCorrect: true } // both are correct but we treat both individually here
+      ]
+    },
+    {
+      question: "Inside which HTML element do we put the JavaScript?",
+      answers: [
+        { text: "<js>", isCorrect: false },
+        { text: "<script>", isCorrect: true },
+        { text: "<javascript>", isCorrect: false },
+        { text: "<scripting>", isCorrect: false }
+      ]
+    }
+  ];
+
+  let examQuestions = [];
+  let currentQuestionIndex = 0;
+  let userAnswers = [];
+
+  const startBtn = document.getElementById('start-btn');
+  const welcomeScreen = document.getElementById('welcome-screen');
+  const examScreen = document.getElementById('exam-screen');
+  const resultScreen = document.getElementById('result-screen');
+  const questionNumberSpan = document.getElementById('question-number');
+  const totalQuestionsSpan = document.getElementById('total-questions');
+  const questionText = document.getElementById('question-text');
+  const answersList = document.getElementById('answers-list');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const submitBtn = document.getElementById('submit-btn');
+  const scoreText = document.getElementById('score-text');
+  const retryBtn = document.getElementById('retry-btn');
+
+  // Utility to shuffle array
+  function shuffleArray(arr) {
+    const array = arr.slice();
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function loadQuestion(index) {
+    const q = examQuestions[index];
+    questionNumberSpan.textContent = index + 1;
+    totalQuestionsSpan.textContent = examQuestions.length;
+    questionText.textContent = q.question;
+    answersList.innerHTML = '';
+
+    q.answers.forEach((answer, i) => {
+      const li = document.createElement('li');
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'answer';
+      input.id = 'answer' + i;
+      input.value = i;
+      if (userAnswers[index] === i) {
+        input.checked = true;
+      }
+      input.addEventListener('change', () => {
+        userAnswers[index] = i;
+        checkSubmitReady();
+      });
+      const label = document.createElement('label');
+      label.htmlFor = 'answer' + i;
+      label.textContent = answer.text;
+      li.appendChild(input);
+      li.appendChild(label);
+      answersList.appendChild(li);
+    });
+
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === examQuestions.length - 1;
+  }
+
+  function checkSubmitReady() {
+    // Enable submit only if all questions are answered
+    const ready = userAnswers.length === examQuestions.length && userAnswers.every(ans => ans !== undefined);
+    submitBtn.disabled = !ready;
+  }
+
+  function startExam() {
+    welcomeScreen.style.display = 'none';
+    resultScreen.style.display = 'none';
+    examScreen.style.display = 'block';
+    currentQuestionIndex = 0;
+    // Randomize questions and their answer options
+    examQuestions = shuffleArray(questionBank).map(q => {
+      return {...q, answers: shuffleArray(q.answers)};
+    });
+    // Reset user answers
+    userAnswers = new Array(examQuestions.length);
+    loadQuestion(currentQuestionIndex);
+    checkSubmitReady();
+  }
+
+  function showResult() {
+    examScreen.style.display = 'none';
+    resultScreen.style.display = 'block';
+    let correctCount = 0;
+    for (let i = 0; i < examQuestions.length; i++) {
+      const userAnswerIndex = userAnswers[i];
+      if (userAnswerIndex !== undefined && examQuestions[i].answers[userAnswerIndex].isCorrect) {
+        correctCount++;
+      }
+    }
+    scoreText.textContent = `You answered ${correctCount} out of ${examQuestions.length} questions correctly (${Math.round((correctCount / examQuestions.length) * 100)}%).`;
+  }
+
+  startBtn.addEventListener('click', startExam);
+  prevBtn.addEventListener('click', () => {
+    if (currentQuestionIndex > 0) {
+      currentQuestionIndex--;
+      loadQuestion(currentQuestionIndex);
+    }
+  });
+  nextBtn.addEventListener('click', () => {
+    if (currentQuestionIndex < examQuestions.length - 1) {
+      currentQuestionIndex++;
+      loadQuestion(currentQuestionIndex);
+    }
+  });
+  submitBtn.addEventListener('click', () => {
+    showResult();
+  });
+  retryBtn.addEventListener('click', () => {
+    startExam();
+  });
+</script>
+</body>
+</html>
+
